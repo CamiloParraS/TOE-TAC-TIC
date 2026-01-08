@@ -30,6 +30,7 @@ const gameController = (() => {
   const playerX = player("X");
   const playerO = player("O");
   let round = 1;
+  let gameOver = false;
 
   const winningCombos = [
     [0, 1, 2], // rows
@@ -45,6 +46,7 @@ const gameController = (() => {
   const reset = () => {
     gameBoard.reset();
     round = 1;
+    gameOver = false;
   };
 
   const currentPlayer = () =>
@@ -64,10 +66,15 @@ const gameController = (() => {
   };
 
   const playRound = (index) => {
+    if (gameOver) {
+      return { ok: false, reason: "game-over" };
+    }
+
     const boardSize = gameBoard.getBoardSize();
     if (!Number.isInteger(index) || index < 0 || index >= boardSize) {
       return { ok: false, reason: "invalid-index" };
     }
+
     if (gameBoard.getField(index) !== "")
       return { ok: false, reason: "occupied" };
 
@@ -76,22 +83,23 @@ const gameController = (() => {
 
     const result = checkWinConditions();
     if (result === "X" || result === "O") {
-      console.log(`Winner: ${result}`);
+      gameOver = true;
       return { ok: true, winner: result, round, finished: true };
     }
 
     if (result === "draw") {
+      gameOver = true;
       console.log("DRAW");
       return { ok: true, winner: null, round, finished: true };
     }
 
-    console.log(`Current Round: ${round}`);
     round++;
-    console.log(`${currentPlayer()} turn`);
     return { ok: true, finished: false };
   };
 
-  return { playRound, currentPlayer, reset, checkWinConditions };
+  const isGameOver = () => gameOver;
+
+  return { playRound, currentPlayer, reset, checkWinConditions, isGameOver };
 })();
 
 const displayController = (() => {
@@ -113,9 +121,23 @@ const displayController = (() => {
 
   const handleResult = (game) => {
     if (!game.ok) {
+      if (game.reason === "game-over") {
+        showMessage("Game over --- press Reset to play again");
+        return;
+      }
       showMessage(
-        game.reason === "occupied" ? "That Cell is taken" : "Invalid Move",
+        game.reason === "occupied" ? "That cell is taken" : "Invalid Move",
       );
+      return;
+    }
+
+    if (game.finished) {
+      if (game.winner) {
+        showMessage(`${game.winner} WINS!!`);
+      } else {
+        showMessage("Draw");
+      }
+      return;
     }
 
     showMessage(`${gameController.currentPlayer()} Turn to move`);
@@ -137,7 +159,7 @@ const displayController = (() => {
   cells.forEach((cell, i) => {
     cell.addEventListener("click", () => {
       console.log(`clicked cell ${i}`);
-      index = i;
+      const index = i;
       const game = gameController.playRound(index);
       handleResult(game);
       renderBoard();
@@ -145,6 +167,7 @@ const displayController = (() => {
   });
 
   renderBoard();
+  showMessage(`${gameController.currentPlayer()} Turn to move`);
 
   return { renderBoard };
 })();
