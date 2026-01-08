@@ -31,6 +31,7 @@ const gameController = (() => {
   const playerO = player("O");
   let round = 1;
   let gameOver = false;
+  let result = null;
 
   const winningCombos = [
     [0, 1, 2], // rows
@@ -66,31 +67,25 @@ const gameController = (() => {
   };
 
   const playRound = (index) => {
-    if (gameOver) {
-      return { ok: false, reason: "game-over" };
-    }
-
     const boardSize = gameBoard.getBoardSize();
+
+    if (gameOver) return { ok: false, reason: "game-over" };
     if (!Number.isInteger(index) || index < 0 || index >= boardSize) {
       return { ok: false, reason: "invalid-index" };
     }
-
-    if (gameBoard.getField(index) !== "")
+    if (gameBoard.getField(index) !== "") {
       return { ok: false, reason: "occupied" };
+    }
 
     const sign = currentPlayer();
     gameBoard.setField(index, sign);
 
-    const result = checkWinConditions();
-    if (result === "X" || result === "O") {
-      gameOver = true;
-      return { ok: true, winner: result, round, finished: true };
-    }
+    const winCheck = checkWinConditions();
 
-    if (result === "draw") {
+    if (winCheck) {
       gameOver = true;
-      console.log("DRAW");
-      return { ok: true, winner: null, round, finished: true };
+      result = winCheck;
+      return { ok: true, finished: true };
     }
 
     round++;
@@ -98,8 +93,15 @@ const gameController = (() => {
   };
 
   const isGameOver = () => gameOver;
+  const getResult = () => result;
 
-  return { playRound, currentPlayer, reset, checkWinConditions, isGameOver };
+  return {
+    playRound,
+    currentPlayer,
+    reset,
+    isGameOver,
+    getResult,
+  };
 })();
 
 const displayController = (() => {
@@ -107,9 +109,27 @@ const displayController = (() => {
   const statusMessage = document.getElementById("statusMessage");
   const cells = document.querySelectorAll(".cell");
 
+  const getStatusText = () => {
+    if (gameController.isGameOver()) {
+      const result = gameController.getResult();
+      return result === "draw" ? "Draw" : `${result} WINS!!`;
+    }
+    return `${gameController.currentPlayer()} Turn to move`;
+  };
+
   const showMessage = (message) => {
     if (!statusMessage) return;
     statusMessage.textContent = message;
+
+    messageTimeout = setTimeout(() => {
+      updateGameStatus();
+    }, 3000);
+  };
+
+  const updateGameStatus = () => {
+    if (statusMessage) {
+      statusMessage.textContent = getStatusText();
+    }
   };
 
   const renderBoard = () => {
@@ -121,26 +141,15 @@ const displayController = (() => {
 
   const handleResult = (game) => {
     if (!game.ok) {
-      if (game.reason === "game-over") {
-        showMessage("Game over --- press Reset to play again");
-        return;
-      }
-      showMessage(
-        game.reason === "occupied" ? "That cell is taken" : "Invalid Move",
-      );
+      let msg = "Invalid Move";
+      if (game.reason === "game-over") msg = "Game over --- press Reset";
+      else if (game.reason === "occupied") msg = "That cell is taken";
+
+      showMessage(msg);
       return;
     }
 
-    if (game.finished) {
-      if (game.winner) {
-        showMessage(`${game.winner} WINS!!`);
-      } else {
-        showMessage("Draw");
-      }
-      return;
-    }
-
-    showMessage(`${gameController.currentPlayer()} Turn to move`);
+    updateGameStatus();
   };
 
   if (resetButton) {
@@ -167,7 +176,7 @@ const displayController = (() => {
   });
 
   renderBoard();
-  showMessage(`${gameController.currentPlayer()} Turn to move`);
+  updateGameStatus();
 
   return { renderBoard };
 })();
