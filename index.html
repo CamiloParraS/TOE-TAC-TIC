@@ -10,23 +10,26 @@
 /modern-normalize.min.css"
             rel="stylesheet"
         />
+        <link rel="stylesheet" type="text/css" href="yorha.css" />
         <link rel="stylesheet" type="text/css" href="style.css" />
     </head>
     <body>
-        <h1>Hello, world!</h1>
-        <button id="resetButton">RESET ROUND</button>
-        <span id="statusMessage"> --- </span>
-
-        <div id="gameGrid">
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
+        <div class="gameWrapper">
+            <div class="gameGrid" id="gameGrid">
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+            </div>
+            <div class="status">
+                <button id="resetButton">RESET ROUND</button>
+                <span id="statusMessage"> --- </span>
+            </div>
         </div>
 
         <script src="script.js"></script>
