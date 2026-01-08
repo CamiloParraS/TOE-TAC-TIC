@@ -1,0 +1,13 @@
+.cell {
+    height: 10rem;
+    width: 10rem;
+    border: 1px solid black;
+    margin: 10px;
+}
+
+#gameGrid {
+    display: flex;
+    width: 34rem;
+    flex-wrap: wrap;
+    flex-direction: row;
+}

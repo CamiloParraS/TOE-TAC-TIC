@@ -15,7 +15,7 @@ const gameBoard = (() => {
   };
 
   const getBoard = () => board.slice();
-  const getBoardSize = () => board.length();
+  const getBoardSize = () => board.length;
 
   return { reset, getField, setField, getBoard, getBoardSize };
 })();
@@ -59,12 +59,12 @@ const gameController = (() => {
       }
     }
 
-    if (round === 9) return "draw";
+    if (!gameBoard.getBoard().includes("")) return "draw";
     return null;
   };
 
   const playRound = (index) => {
-    boardSize = gameBoard.getBoardSize();
+    const boardSize = gameBoard.getBoardSize();
     if (!Number.isInteger(index) || index < 0 || index >= boardSize) {
       return { ok: false, reason: "invalid-index" };
     }
@@ -77,19 +77,74 @@ const gameController = (() => {
     const result = checkWinConditions();
     if (result === "X" || result === "O") {
       console.log(`Winner: ${result}`);
-      return { winner: result, round };
+      return { ok: true, winner: result, round, finished: true };
     }
 
     if (result === "draw") {
       console.log("DRAW");
-      reset();
-      return { winner: null, round };
+      return { ok: true, winner: null, round, finished: true };
     }
 
     console.log(`Current Round: ${round}`);
     round++;
     console.log(`${currentPlayer()} turn`);
+    return { ok: true, finished: false };
   };
 
   return { playRound, currentPlayer, reset, checkWinConditions };
+})();
+
+const displayController = (() => {
+  const resetButton = document.getElementById("resetButton");
+  const statusMessage = document.getElementById("statusMessage");
+  const cells = document.querySelectorAll(".cell");
+
+  const showMessage = (message) => {
+    if (!statusMessage) return;
+    statusMessage.textContent = message;
+  };
+
+  const renderBoard = () => {
+    const board = gameBoard.getBoard();
+    cells.forEach((cell, i) => {
+      cell.textContent = board[i];
+    });
+  };
+
+  const handleResult = (game) => {
+    if (!game.ok) {
+      showMessage(
+        game.reason === "occupied" ? "That Cell is taken" : "Invalid Move",
+      );
+    }
+
+    showMessage(`${gameController.currentPlayer()} Turn to move`);
+  };
+
+  if (resetButton) {
+    resetButton.addEventListener("click", () => {
+      gameController.reset();
+      renderBoard();
+
+      showMessage("The board has been reset");
+
+      setTimeout(() => {
+        showMessage(`${gameController.currentPlayer()} Turn to move`);
+      }, 3000);
+    });
+  }
+
+  cells.forEach((cell, i) => {
+    cell.addEventListener("click", () => {
+      console.log(`clicked cell ${i}`);
+      index = i;
+      const game = gameController.playRound(index);
+      handleResult(game);
+      renderBoard();
+    });
+  });
+
+  renderBoard();
+
+  return { renderBoard };
 })();
