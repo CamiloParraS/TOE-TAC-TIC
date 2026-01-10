@@ -141,8 +141,21 @@ const displayController = (() => {
 
   const renderBoard = () => {
     const board = gameBoard.getBoard();
+
     cells.forEach((cell, i) => {
-      cell.textContent = board[i];
+      const currentMark = cell.textContent;
+      const newMark = board[i];
+
+      // Only modify the DOM if the value has actually changed
+      if (currentMark !== newMark) {
+        cell.innerHTML = ""; // Clear the cell
+
+        if (newMark !== "") {
+          const span = document.createElement("span");
+          span.textContent = newMark;
+          cell.appendChild(span);
+        }
+      }
     });
   };
 

@@ -23,6 +23,23 @@ body {
     color: rgba(0, 0, 0, 0.657);
     transition: all 0.2s;
     background-color: #dcd8c0;
+    font-size: 3rem;
+    font-weight: bold;
+    overflow: hidden;
+}
+
+.cell:not(:has(span)) {
+    cursor: pointer;
+}
+
+.cell:has(span) {
+    cursor: default;
+    pointer-events: none;
+}
+
+.cell span:not(:empty) {
+    display: block;
+    animation: appear 0.4s cubic-bezier(0.5, 1.8, 0.1, 1.1) forwards;
 }
 
 .cell:hover {
@@ -45,4 +62,13 @@ body {
     flex-direction: column;
     padding: 0.5rem 2rem;
     align-items: center;
+}
+
+@keyframes appear {
+    from {
+        transform: scale(0.3);
+    }
+    to {
+        transform: scale(1);
+    }
 }
