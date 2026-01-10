@@ -39,6 +39,7 @@ body {
 
 .cell span:not(:empty) {
     display: block;
+    transform-origin: center;
     animation: appear 0.4s cubic-bezier(0.5, 1.8, 0.1, 1.1) forwards;
 }
 
@@ -46,6 +47,56 @@ body {
     box-shadow: 0.2em 0.2em 0.1em 0 #bab5a1;
     background-color: #454138;
     color: #dcd8c0;
+}
+
+.cell.highlight-winner {
+    color: #dcd8c0 !important;
+    box-shadow: inset 0 0 0 2px #bab5a1;
+    transform: scale(1.05);
+    z-index: 2;
+}
+
+.cell.highlight-winner:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #454138;
+    z-index: -1;
+    transform-origin: left center;
+    animation: slide 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes slide {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}
+
+.cell.highlight-winner span {
+    animation: blink 0.12s steps(3) 2;
+}
+
+@keyframes blink {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
+.cell.highlight-other {
+    background-color: #bab5a1;
+    opacity: 0.5;
+    transform: scale(0.97);
+    transition: all 0.4s ease;
 }
 
 .gameGrid {
@@ -65,10 +116,13 @@ body {
 }
 
 @keyframes appear {
-    from {
+    0% {
         transform: scale(0.3);
     }
-    to {
+    60% {
+        transform: scale(1.08);
+    }
+    100% {
         transform: scale(1);
     }
 }

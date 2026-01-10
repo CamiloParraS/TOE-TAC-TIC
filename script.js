@@ -60,7 +60,7 @@ const gameController = (() => {
     for (const combo of winningCombos) {
       const [a, b, c] = combo;
       if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-        return board[a];
+        return { winner: board[a], combo: combo };
       }
     }
 
@@ -86,8 +86,18 @@ const gameController = (() => {
 
     if (winCheck) {
       gameOver = true;
-      result = winCheck;
       matchCount++;
+
+      if (typeof winCheck === "object" && winCheck.combo) {
+        result = winCheck.winner;
+        return { ok: true, finished: true, combo: winCheck.combo };
+      }
+
+      if (winCheck === "draw") {
+        result = "draw";
+        return { ok: true, finished: true };
+      }
+
       return { ok: true, finished: true };
     }
 
@@ -141,20 +151,19 @@ const displayController = (() => {
 
   const renderBoard = () => {
     const board = gameBoard.getBoard();
+    const isOver = gameController.isGameOver();
 
     cells.forEach((cell, i) => {
       const currentMark = cell.textContent;
       const newMark = board[i];
 
-      // Only modify the DOM if the value has actually changed
-      if (currentMark !== newMark) {
+      if (isOver && newMark === "" && !cell.querySelector("span")) {
+        cell.innerHTML = "<span>&nbsp;</span>";
+      } else if (currentMark !== newMark && newMark !== "") {
         cell.innerHTML = "";
-
-        if (newMark !== "") {
-          const span = document.createElement("span");
-          span.textContent = newMark;
-          cell.appendChild(span);
-        }
+        const span = document.createElement("span");
+        span.textContent = newMark;
+        cell.appendChild(span);
       }
     });
   };
@@ -169,11 +178,33 @@ const displayController = (() => {
       return;
     }
 
+    if (game.finished) {
+      const combo = Array.isArray(game.combo) ? game.combo : null;
+
+      if (combo) {
+        cells.forEach((cell, idx) => {
+          if (combo.includes(idx)) {
+            cell.classList.add("highlight-winner");
+          } else {
+            cell.classList.add("highlight-other");
+          }
+        });
+      } else {
+        cells.forEach((cell) => {
+          cell.classList.add("highlight-other");
+        });
+      }
+    }
+
     updateGameStatus();
   };
 
   if (resetButton) {
     resetButton.addEventListener("click", () => {
+      cells.forEach((cell) => {
+        cell.classList.remove("highlight-winner", "highlight-other");
+        cell.innerHTML = "";
+      });
       gameController.reset();
       renderBoard();
 
