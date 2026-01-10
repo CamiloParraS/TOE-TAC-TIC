@@ -148,7 +148,7 @@ const displayController = (() => {
 
       // Only modify the DOM if the value has actually changed
       if (currentMark !== newMark) {
-        cell.innerHTML = ""; // Clear the cell
+        cell.innerHTML = "";
 
         if (newMark !== "") {
           const span = document.createElement("span");
@@ -187,7 +187,6 @@ const displayController = (() => {
 
   cells.forEach((cell, i) => {
     cell.addEventListener("click", () => {
-      console.log(`clicked cell ${i}`);
       const index = i;
       const game = gameController.playRound(index);
       handleResult(game);
