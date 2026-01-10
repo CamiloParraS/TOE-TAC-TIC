@@ -30,6 +30,7 @@ const gameController = (() => {
   const playerX = player("X");
   const playerO = player("O");
   let round = 1;
+  let matchCount = 0;
   let gameOver = false;
   let result = null;
 
@@ -48,10 +49,11 @@ const gameController = (() => {
     gameBoard.reset();
     round = 1;
     gameOver = false;
+    result = null;
   };
 
   const currentPlayer = () =>
-    round % 2 === 1 ? playerX.getSign() : playerO.getSign();
+    (round + matchCount) % 2 === 0 ? playerO.getSign() : playerX.getSign();
 
   const checkWinConditions = () => {
     const board = gameBoard.getBoard();
@@ -85,6 +87,7 @@ const gameController = (() => {
     if (winCheck) {
       gameOver = true;
       result = winCheck;
+      matchCount++;
       return { ok: true, finished: true };
     }
 
@@ -109,6 +112,8 @@ const displayController = (() => {
   const statusMessage = document.getElementById("statusMessage");
   const cells = document.querySelectorAll(".cell");
 
+  let messageTimeout;
+
   const getStatusText = () => {
     if (gameController.isGameOver()) {
       const result = gameController.getResult();
@@ -121,9 +126,11 @@ const displayController = (() => {
     if (!statusMessage) return;
     statusMessage.textContent = message;
 
+    if (messageTimeout) clearTimeout(messageTimeout);
+
     messageTimeout = setTimeout(() => {
       updateGameStatus();
-    }, 3000);
+    }, 2000);
   };
 
   const updateGameStatus = () => {
