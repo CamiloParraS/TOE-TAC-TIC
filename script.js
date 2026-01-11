@@ -29,8 +29,14 @@ const gameBoard = (() => {
 // ==============================
 const player = (sign) => {
   const marker = sign;
+  let wins = 0;
+
   const getSign = () => marker;
-  return { getSign };
+  const getWins = () => wins;
+  const incrementWins = () => {
+    wins++;
+  };
+  return { getSign, getWins, incrementWins };
 };
 
 // ==============================
@@ -44,6 +50,7 @@ const gameController = (() => {
   let matchCount = 0;
   let gameOver = false;
   let result = null;
+  let draws = 0;
 
   const winningCombos = [
     [0, 1, 2], // rows
@@ -62,6 +69,12 @@ const gameController = (() => {
     gameOver = false;
     result = null;
   };
+
+  const getWins = (sign) => {
+    return sign === "X" ? playerX.getWins() : playerO.getWins();
+  };
+
+  const getDraws = () => draws;
 
   const currentPlayer = () =>
     (round + matchCount) % 2 === 0 ? playerO.getSign() : playerX.getSign();
@@ -101,11 +114,17 @@ const gameController = (() => {
 
       if (typeof winCheck === "object" && winCheck.combo) {
         result = winCheck.winner;
+        if (winCheck.winner === "X") {
+          playerX.incrementWins();
+        } else {
+          playerO.incrementWins();
+        }
         return { ok: true, finished: true, combo: winCheck.combo };
       }
 
       if (winCheck === "draw") {
         result = "draw";
+        draws++;
         return { ok: true, finished: true };
       }
 
@@ -125,6 +144,8 @@ const gameController = (() => {
     reset,
     isGameOver,
     getResult,
+    getDraws,
+    getWins,
   };
 })();
 
@@ -135,6 +156,11 @@ const displayController = (() => {
   const cells = document.querySelectorAll(".cell");
   const statusMessage = document.getElementById("statusMessage");
   const resetButton = document.getElementById("resetButton");
+
+  const scoreX = document.getElementById("scoreX");
+  const scoreO = document.getElementById("scoreO");
+  const scoreDraw = document.getElementById("scoreDraw");
+
   let messageTimeout;
 
   // --- UI Helpers ---
@@ -161,18 +187,16 @@ const displayController = (() => {
   const renderBoard = () => {
     const board = gameBoard.getBoard();
     cells.forEach((cell, i) => {
-      const currentMark = cell.textContent;
-      const newMark = board[i];
-
-      if (isOver && newMark === "" && !cell.querySelector("span")) {
-        cell.innerHTML = "<span>&nbsp;</span>";
-      } else if (currentMark !== newMark && newMark !== "") {
-        cell.innerHTML = "";
-        const span = document.createElement("span");
-        span.textContent = newMark;
-        cell.appendChild(span);
+      if (cell.textContent !== board[i]) {
+        cell.innerHTML = board[i] ? `<span>${board[i]}</span>` : "";
       }
     });
+  };
+
+  const updateScores = () => {
+    if (scoreX) scoreX.textContent = `${gameController.getWins("X")}`;
+    if (scoreO) scoreO.textContent = `${gameController.getWins("O")}`;
+    if (scoreDraw) scoreDraw.textContent = `${gameController.getDraws()}`;
   };
 
   // --- Handlers ---
@@ -193,6 +217,7 @@ const displayController = (() => {
 
     if (result.finished) {
       highlightResult(result.combo);
+      updateScores();
     }
     updateStatus();
   };
@@ -213,6 +238,7 @@ const displayController = (() => {
       cell.classList.remove("highlight-winner", "highlight-other");
     });
     renderBoard();
+    updateScores();
     flashMessage("Board Reset!", 1500);
   };
 
