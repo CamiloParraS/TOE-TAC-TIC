@@ -1,3 +1,7 @@
+// ==============================
+//   Game Board Module
+// ==============================
+
 const gameBoard = (() => {
   const board = Array(9).fill("");
 
@@ -20,15 +24,22 @@ const gameBoard = (() => {
   return { reset, getField, setField, getBoard, getBoardSize };
 })();
 
+// ==============================
+//   Player Factory
+// ==============================
 const player = (sign) => {
   const marker = sign;
   const getSign = () => marker;
   return { getSign };
 };
 
+// ==============================
+//   Display Controller
+// ==============================
 const gameController = (() => {
   const playerX = player("X");
   const playerO = player("O");
+
   let round = 1;
   let matchCount = 0;
   let gameOver = false;
@@ -117,42 +128,38 @@ const gameController = (() => {
   };
 })();
 
+// ==============================
+//   Display Controller
+// ==============================
 const displayController = (() => {
-  const resetButton = document.getElementById("resetButton");
-  const statusMessage = document.getElementById("statusMessage");
   const cells = document.querySelectorAll(".cell");
-
+  const statusMessage = document.getElementById("statusMessage");
+  const resetButton = document.getElementById("resetButton");
   let messageTimeout;
 
-  const getStatusText = () => {
-    if (gameController.isGameOver()) {
-      const result = gameController.getResult();
-      return result === "draw" ? "Draw" : `${result} WINS!!`;
-    }
-    return `${gameController.currentPlayer()} Turn to move`;
-  };
-
-  const showMessage = (message) => {
+  // --- UI Helpers ---
+  const updateStatus = (customMsg) => {
     if (!statusMessage) return;
-    statusMessage.textContent = message;
 
-    if (messageTimeout) clearTimeout(messageTimeout);
-
-    messageTimeout = setTimeout(() => {
-      updateGameStatus();
-    }, 2000);
+    if (customMsg) {
+      statusMessage.textContent = customMsg;
+    } else if (gameController.isGameOver()) {
+      const res = gameController.getResult();
+      statusMessage.textContent =
+        res === "draw" ? "It's a Draw!" : `${res} Wins!`;
+    } else {
+      statusMessage.textContent = `${gameController.currentPlayer()}'s Turn`;
+    }
   };
 
-  const updateGameStatus = () => {
-    if (statusMessage) {
-      statusMessage.textContent = getStatusText();
-    }
+  const flashMessage = (msg, duration = 2000) => {
+    updateStatus(msg);
+    clearTimeout(messageTimeout);
+    messageTimeout = setTimeout(() => updateStatus(), duration);
   };
 
   const renderBoard = () => {
     const board = gameBoard.getBoard();
-    const isOver = gameController.isGameOver();
-
     cells.forEach((cell, i) => {
       const currentMark = cell.textContent;
       const newMark = board[i];
@@ -168,65 +175,55 @@ const displayController = (() => {
     });
   };
 
-  const handleResult = (game) => {
-    if (!game.ok) {
-      let msg = "Invalid Move";
-      if (game.reason === "game-over") msg = "Game over --- press Reset";
-      else if (game.reason === "occupied") msg = "That cell is taken";
+  // --- Handlers ---
+  const handleCellClick = (e) => {
+    const index = parseInt(e.target.closest(".cell").dataset.index);
+    const result = gameController.playRound(index);
 
-      showMessage(msg);
+    if (!result.ok) {
+      flashMessage(
+        result.reason === "game-over"
+          ? "Game Over! Reset to play."
+          : "Cell taken!",
+      );
       return;
     }
 
-    if (game.finished) {
-      const combo = Array.isArray(game.combo) ? game.combo : null;
+    renderBoard();
 
-      if (combo) {
-        cells.forEach((cell, idx) => {
-          if (combo.includes(idx)) {
-            cell.classList.add("highlight-winner");
-          } else {
-            cell.classList.add("highlight-other");
-          }
-        });
-      } else {
-        cells.forEach((cell) => {
-          cell.classList.add("highlight-other");
-        });
-      }
+    if (result.finished) {
+      highlightResult(result.combo);
     }
-
-    updateGameStatus();
+    updateStatus();
   };
 
-  if (resetButton) {
-    resetButton.addEventListener("click", () => {
-      cells.forEach((cell) => {
-        cell.classList.remove("highlight-winner", "highlight-other");
-        cell.innerHTML = "";
-      });
-      gameController.reset();
-      renderBoard();
-
-      showMessage("The board has been reset");
-
-      setTimeout(() => {
-        showMessage(`${gameController.currentPlayer()} Turn to move`);
-      }, 3000);
+  const highlightResult = (combo) => {
+    cells.forEach((cell, idx) => {
+      if (combo?.includes(idx)) {
+        cell.classList.add("highlight-winner");
+      } else {
+        cell.classList.add("highlight-other");
+      }
     });
-  }
+  };
 
+  const resetGame = () => {
+    gameController.reset();
+    cells.forEach((cell) => {
+      cell.classList.remove("highlight-winner", "highlight-other");
+    });
+    renderBoard();
+    flashMessage("Board Reset!", 1500);
+  };
+
+  // --- Initialization ---
   cells.forEach((cell, i) => {
-    cell.addEventListener("click", () => {
-      const index = i;
-      const game = gameController.playRound(index);
-      handleResult(game);
-      renderBoard();
-    });
+    cell.dataset.index = i;
+    cell.addEventListener("click", handleCellClick);
   });
 
-  renderBoard();
-  updateGameStatus();
+  resetButton?.addEventListener("click", resetGame);
 
-  return { renderBoard };
+  renderBoard();
+  updateStatus();
 })();
