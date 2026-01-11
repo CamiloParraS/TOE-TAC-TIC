@@ -15,6 +15,14 @@
     </head>
     <body>
         <div class="gameWrapper">
+            <header class="gameHeader">
+                <div class="status">
+                    <span id="statusMessage"
+                        >oh, hi there, the js is broken</span
+                    >
+                </div>
+            </header>
+
             <div class="gameGrid" id="gameGrid">
                 <div class="cell"></div>
                 <div class="cell"></div>
@@ -26,10 +34,10 @@
                 <div class="cell"></div>
                 <div class="cell"></div>
             </div>
-            <div class="status">
-                <button id="resetButton">RESET ROUND</button>
-                <span id="statusMessage"> --- </span>
-            </div>
+
+            <footer class="gameFooter">
+                <button id="resetButton">SYSTEM RESET</button>
+            </footer>
         </div>
 
         <script src="script.js"></script>
