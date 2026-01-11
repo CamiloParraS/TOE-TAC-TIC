@@ -1,3 +1,5 @@
+/* ====== GLOBAL ====== */
+
 body {
     margin: 0;
     min-height: 100vh;
@@ -8,95 +10,13 @@ body {
     box-sizing: border-box;
 }
 
+/* ====== LAYOUT ====== */
+
 .gameWrapper {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-}
-
-.cell {
-    user-select: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(0, 0, 0, 0.657);
-    transition: all 0.2s;
-    background-color: #dcd8c0;
-    font-size: 3rem;
-    font-weight: bold;
-    overflow: hidden;
-}
-
-.cell:not(:has(span)) {
-    cursor: pointer;
-}
-
-.cell:has(span) {
-    cursor: default;
-    pointer-events: none;
-}
-
-.cell span:not(:empty) {
-    display: block;
-    transform-origin: center;
-    animation: appear 0.4s cubic-bezier(0.5, 1.8, 0.1, 1.1) forwards;
-}
-
-.cell:hover {
-    box-shadow: 0.2em 0.2em 0.1em 0 #bab5a1;
-    background-color: #454138;
-    color: #dcd8c0;
-}
-
-.cell.highlight-winner {
-    color: #dcd8c0 !important;
-    box-shadow: inset 0 0 0 2px #bab5a1;
-    transform: scale(1.05);
-    z-index: 2;
-}
-
-.cell.highlight-winner:after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: #454138;
-    z-index: -1;
-    transform-origin: left center;
-    animation: slide 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-@keyframes slide {
-    from {
-        transform: scaleX(0);
-    }
-    to {
-        transform: scaleX(1);
-    }
-}
-
-.cell.highlight-winner span {
-    animation: blink 0.12s steps(3) 2;
-}
-
-@keyframes blink {
-    0%,
-    100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0;
-    }
-}
-
-.cell.highlight-other {
-    background-color: #bab5a1;
-    opacity: 0.5;
-    transform: scale(0.97);
-    transition: all 0.4s ease;
 }
 
 .gameGrid {
@@ -115,6 +35,89 @@ body {
     align-items: center;
 }
 
+/* ====== CELL STYLES ====== */
+
+.cell {
+    position: relative;
+    user-select: none;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 3rem;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.65);
+
+    background-color: #dcd8c0;
+    overflow: hidden;
+
+    transition:
+        background-color 0.2s,
+        color 0.2s,
+        box-shadow 0.2s,
+        transform 0.2s;
+}
+
+/* ====== CELL INTERACTION ====== */
+
+.cell:not(:has(span)) {
+    cursor: pointer;
+}
+
+.cell:has(span) {
+    cursor: default;
+    pointer-events: none;
+}
+
+.cell:hover {
+    background-color: #454138;
+    color: #dcd8c0;
+    box-shadow: 0.2em 0.2em 0.1em 0 #bab5a1;
+}
+
+/* ====== CELL CONTENT ====== */
+
+.cell span:not(:empty) {
+    display: block;
+    transform-origin: center;
+    animation: appear 0.4s cubic-bezier(0.5, 1.8, 0.1, 1.1) forwards;
+}
+
+/* ====== CELL WIN LOSE HIGHLIGHT ====== */
+
+.cell.highlight-winner {
+    color: #dcd8c0 !important;
+    box-shadow: inset 0 0 0 2px #bab5a1;
+    transform: scale(1.05);
+    z-index: 2;
+}
+
+.cell.highlight-winner:after {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background-color: #454138;
+    z-index: -1;
+
+    transform-origin: left center;
+    animation: slide 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.cell.highlight-winner span {
+    animation: blink 0.12s steps(3) 2;
+}
+
+.cell.highlight-other {
+    background-color: #bab5a1;
+    opacity: 0.5;
+    transform: scale(0.97);
+    transition: all 0.4s ease;
+}
+
+/* ====== ANIMATIONS ====== */
+
 @keyframes appear {
     0% {
         transform: scale(0.3);
@@ -124,5 +127,24 @@ body {
     }
     100% {
         transform: scale(1);
+    }
+}
+
+@keyframes slide {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}
+
+@keyframes blink {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
     }
 }
