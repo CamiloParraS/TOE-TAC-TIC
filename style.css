@@ -17,6 +17,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    width: 100%;
 }
 
 .gameHeader {
@@ -58,6 +59,45 @@ body {
     justify-content: center;
     border-top: 2px solid #bab5a1;
     padding-top: 1.5em;
+}
+
+.scores {
+    display: flex;
+    width: 324px;
+    margin: 1rem auto;
+}
+
+.score-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    padding: 10px 5px;
+}
+
+.score-item:not(:last-child) {
+    border-right: 2px solid #bab5a1;
+}
+
+.label {
+    background-color: #454138;
+    color: #dcd8c0;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    margin-bottom: 8px;
+    width: 80%;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.value {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #454138;
+}
+
+.animate-score {
+    animation: blink 0.4s cubic-bezier(0.5, 1.8, 0.1, 1.1);
 }
 
 /* ====== CELL STYLES ====== */

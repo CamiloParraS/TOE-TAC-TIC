@@ -194,9 +194,23 @@ const displayController = (() => {
   };
 
   const updateScores = () => {
-    if (scoreX) scoreX.textContent = `${gameController.getWins("X")}`;
-    if (scoreO) scoreO.textContent = `${gameController.getWins("O")}`;
-    if (scoreDraw) scoreDraw.textContent = `${gameController.getDraws()}`;
+    const scores = [
+      { element: scoreX, value: gameController.getWins("X") },
+      { element: scoreO, value: gameController.getWins("O") },
+      { element: scoreDraw, value: gameController.getDraws() },
+    ];
+
+    scores.forEach(({ element, value }) => {
+      if (element.textContent !== String(value)) {
+        element.textContent = value;
+
+        element.classList.remove("animate-score");
+
+        setTimeout(() => {
+          element.classList.add("animate-score");
+        }, 10);
+      }
+    });
   };
 
   // --- Handlers ---
