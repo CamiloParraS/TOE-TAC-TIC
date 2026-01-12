@@ -64,6 +64,11 @@ body {
     padding-top: 1.5em;
 }
 
+.score-label.active {
+    position: relative;
+    z-index: 1;
+}
+
 .scores {
     display: flex;
     width: 324px;
@@ -83,7 +88,6 @@ body {
 }
 
 .score-label {
-    padding: 0.35rem 0.5rem;
     font-size: 0.8em;
     margin-bottom: 0.4rem;
     border: none;
@@ -95,6 +99,12 @@ body {
     transition-duration: 0.2s;
     position: relative;
     z-index: 1;
+
+    display: inline-block;
+    padding: 0;
+    position: relative;
+    width: 100%;
+    cursor: text;
 }
 
 .score-label::before {
@@ -135,6 +145,48 @@ body {
 }
 .score-label.active::after {
     width: 100%;
+}
+
+.ghost-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    text-align: center;
+    color: inherit;
+    font-family: inherit;
+    font-weight: inherit;
+    font-size: inherit;
+    text-transform: inherit;
+    padding: 0.35rem 0.5rem;
+    background-color: inherit;
+    position: relative;
+    z-index: 2;
+}
+
+.ghost-input:not(:focus, .active) {
+    background-color: transparent;
+}
+
+.ghost-input:focus {
+    background-color: inherit;
+}
+
+.score-label .ghost-input:focus {
+    color: #454138;
+    background-color: #dcd8c0;
+    transition-duration: 0.4s;
+}
+
+.score-label.active .ghost-input:focus {
+    color: #454138;
+    background-color: #dcd8c0;
+    transition-duration: 0.4s;
+}
+
+.ghost-input.readonly {
+    cursor: default;
+    pointer-events: none;
+    user-select: none;
 }
 
 .value {
