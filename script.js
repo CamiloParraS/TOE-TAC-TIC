@@ -161,6 +161,9 @@ const displayController = (() => {
   const scoreO = document.getElementById("scoreO");
   const scoreDraw = document.getElementById("scoreDraw");
 
+  const labelX = document.getElementById("label-playerX");
+  const labelO = document.getElementById("label-playerO");
+
   let messageTimeout;
 
   // --- UI Helpers ---
@@ -176,6 +179,18 @@ const displayController = (() => {
     } else {
       statusMessage.textContent = `${gameController.currentPlayer()}'s Turn`;
     }
+  };
+
+  const updateActivePlayer = () => {
+    if (gameController.isGameOver()) {
+      labelX.classList.remove("active");
+      labelO.classList.remove("active");
+      return;
+    }
+
+    const currentPlayer = gameController.currentPlayer();
+    labelX.classList.toggle("active", currentPlayer === "X");
+    labelO.classList.toggle("active", currentPlayer === "O");
   };
 
   const flashMessage = (msg, duration = 2000) => {
@@ -234,6 +249,7 @@ const displayController = (() => {
       updateScores();
     }
     updateStatus();
+    updateActivePlayer();
   };
 
   const highlightResult = (combo) => {
@@ -253,6 +269,7 @@ const displayController = (() => {
     });
     renderBoard();
     updateScores();
+    updateActivePlayer();
     flashMessage("Board Reset!", 1500);
   };
 
@@ -266,4 +283,5 @@ const displayController = (() => {
 
   renderBoard();
   updateStatus();
+  updateActivePlayer();
 })();
