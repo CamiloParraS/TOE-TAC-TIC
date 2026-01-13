@@ -30,13 +30,18 @@ const gameBoard = (() => {
 const player = (sign) => {
   const marker = sign;
   let wins = 0;
+  let name = "Player";
 
+  const getName = () => name;
+  const setName = (newName) => {
+    name = newName;
+  };
   const getSign = () => marker;
   const getWins = () => wins;
   const incrementWins = () => {
     wins++;
   };
-  return { getSign, getWins, incrementWins };
+  return { getSign, getWins, incrementWins, getName, setName };
 };
 
 // ==============================
@@ -135,8 +140,30 @@ const gameController = (() => {
     return { ok: true, finished: false };
   };
 
+  const getCurrentPlayerName = () => {
+    const sign = currentPlayer();
+    return sign === "X" ? playerX.getName() : playerO.getName();
+  };
+
+  const setPlayerName = (sign, newName) => {
+    let validatedName = newName.trim();
+    if (validatedName === "") {
+      validatedName = sign === "X" ? "PLAYER X" : "PLAYER O";
+    }
+
+    if (sign === "X") playerX.setName(validatedName);
+    if (sign === "O") playerO.setName(validatedName);
+  };
+
+  const getPlayerName = (sign) => {
+    return sign === "X" ? playerX.getName() : playerO.getName();
+  };
+
   const isGameOver = () => gameOver;
   const getResult = () => result;
+
+  setPlayerName("X", "Player X");
+  setPlayerName("O", "Player O");
 
   return {
     playRound,
@@ -146,6 +173,9 @@ const gameController = (() => {
     getResult,
     getDraws,
     getWins,
+    getCurrentPlayerName,
+    getPlayerName,
+    setPlayerName,
   };
 })();
 
@@ -164,6 +194,9 @@ const displayController = (() => {
   const labelX = document.getElementById("label-playerX");
   const labelO = document.getElementById("label-playerO");
 
+  const nameX = document.getElementById("playerX-input");
+  const nameO = document.getElementById("playerO-input");
+
   let messageTimeout;
 
   // --- UI Helpers ---
@@ -174,10 +207,15 @@ const displayController = (() => {
       statusMessage.textContent = customMsg;
     } else if (gameController.isGameOver()) {
       const res = gameController.getResult();
-      statusMessage.textContent =
-        res === "draw" ? "It's a Draw!" : `${res} Wins!`;
+
+      if (res === "draw") {
+        statusMessage.textContent = "It's a Draw!";
+      } else {
+        const winnerName = gameController.getPlayerName(res);
+        statusMessage.textContent = `${winnerName} Wins!`;
+      }
     } else {
-      statusMessage.textContent = `${gameController.currentPlayer()}'s Turn`;
+      statusMessage.textContent = `${gameController.getCurrentPlayerName()}'s Turn`;
     }
   };
 
@@ -228,6 +266,27 @@ const displayController = (() => {
     });
   };
 
+  const highlightResult = (combo) => {
+    cells.forEach((cell, idx) => {
+      if (combo?.includes(idx)) {
+        cell.classList.add("highlight-winner");
+      } else {
+        cell.classList.add("highlight-other");
+      }
+    });
+  };
+
+  const resetGame = () => {
+    gameController.reset();
+    cells.forEach((cell) => {
+      cell.classList.remove("highlight-winner", "highlight-other");
+    });
+    renderBoard();
+    updateScores();
+    updateActivePlayer();
+    flashMessage("Board Reset!", 1500);
+  };
+
   // --- Handlers ---
   const handleCellClick = (e) => {
     const index = parseInt(e.target.closest(".cell").dataset.index);
@@ -252,26 +311,17 @@ const displayController = (() => {
     updateActivePlayer();
   };
 
-  const highlightResult = (combo) => {
-    cells.forEach((cell, idx) => {
-      if (combo?.includes(idx)) {
-        cell.classList.add("highlight-winner");
-      } else {
-        cell.classList.add("highlight-other");
-      }
-    });
-  };
+  nameX.addEventListener("change", (e) => {
+    gameController.setPlayerName("X", e.target.value);
+    nameX.value = gameController.getPlayerName("X");
+    updateStatus();
+  });
 
-  const resetGame = () => {
-    gameController.reset();
-    cells.forEach((cell) => {
-      cell.classList.remove("highlight-winner", "highlight-other");
-    });
-    renderBoard();
-    updateScores();
-    updateActivePlayer();
-    flashMessage("Board Reset!", 1500);
-  };
+  nameO.addEventListener("change", (e) => {
+    gameController.setPlayerName("O", e.target.value);
+    nameO.value = gameController.getPlayerName("O");
+    updateStatus();
+  });
 
   // --- Initialization ---
   cells.forEach((cell, i) => {
@@ -280,6 +330,9 @@ const displayController = (() => {
   });
 
   resetButton?.addEventListener("click", resetGame);
+
+  gameController.setPlayerName("X", nameX.value);
+  gameController.setPlayerName("O", nameO.value);
 
   renderBoard();
   updateStatus();
