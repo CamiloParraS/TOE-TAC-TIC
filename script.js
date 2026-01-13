@@ -40,7 +40,7 @@ const player = (sign) => {
 };
 
 // ==============================
-//   Display Controller
+//   Game Controller
 // ==============================
 const gameController = (() => {
   const playerX = player("X");
