@@ -71,7 +71,8 @@ body {
 
 .scores {
     display: flex;
-    width: 324px;
+    max-width: 324px;
+    width: 100%;
     margin: 1rem auto;
 }
 
@@ -172,6 +173,12 @@ body {
 }
 
 .score-label .ghost-input:focus {
+    color: #454138;
+    background-color: #bab5a1;
+    transition-duration: 0.4s;
+}
+
+.score-label .ghost-input:hover {
     color: #454138;
     background-color: #dcd8c0;
     transition-duration: 0.4s;
